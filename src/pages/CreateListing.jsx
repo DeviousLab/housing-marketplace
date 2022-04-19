@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
@@ -131,8 +132,17 @@ function CreateListing() {
       toast.error(error);
       return
     });
-    console.log(imgUrls);
+
+    const formDataCopy = { ...formData, geolocation, imgUrls, timestamp: serverTimestamp()};
+    delete formDataCopy.images;
+    delete formDataCopy.address;
+    location && (formDataCopy.location = location);
+    !formDataCopy.offer && delete formDataCopy.discountedPrice;
+
+    const docRef = await addDoc(collection(db, 'listings'), formDataCopy);
     setLoading(false);
+    toast.success('Listing created successfully');
+    navigate(`/category/${formDataCopy.type}/${docRef.id}`);
   }
 
   const onMutate = (e) => {
