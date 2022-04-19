@@ -16,7 +16,7 @@ function Category() {
     const fetchListings = async () => {
       try {
         const listingsRef = collection(db, 'listings');
-        const q = query(listingsRef, where('category', '==', params.categoryName), limit(10));
+        const q = query(listingsRef, where('type', '==', params.categoryName), orderBy('timestamp', 'desc'), limit(10));
         const querySnap = await getDocs(q);
         let listings = [];
         querySnap.forEach(doc => {
@@ -29,7 +29,6 @@ function Category() {
         setLoading(false);
       } catch (error) {
         toast.error('Error fetching listings');
-        console.log(error);
       }
     }
     fetchListings();
