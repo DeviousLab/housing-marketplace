@@ -3,6 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getDoc, doc } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import 'swiper/css/a11y';
 
 import { db } from '../firebase.config'
 import Spinner from '../components/Spinner'
@@ -35,6 +42,28 @@ function Listing() {
 
   return (
     <main>
+      <Swiper
+        modules={[Navigation, Pagination, Scrollbar, A11y]}
+        slidesPerView='auto'
+        loop
+        pagination={{ clickable: true }}
+        navigation
+        style={{ height: '300px' }}
+      >
+        {listing.imgUrls.map((url, index) => {
+          return (
+            <SwiperSlide key={index}>
+              <div
+                className='swiperSlideDiv'
+                style={{
+                  background: `url(${listing.imgUrls[index]}) center no-repeat`,
+                  backgroundSize: 'cover',
+                }}
+              ></div>
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
       <div className="shareIconDiv" onClick={() => {
         navigator.clipboard.writeText(window.location.href);
         setShareLinkCopied(true);
