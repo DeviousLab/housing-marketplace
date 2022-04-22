@@ -11,7 +11,6 @@ import 'swiper/css/a11y';
 
 import { db } from '../firebase.config';
 import Spinner from './Spinner';
-import { list } from 'firebase/storage';
 
 function Slider() {
   const [loading, setLoading] = useState(true);
@@ -41,6 +40,10 @@ function Slider() {
 
   if (loading) {
     return <Spinner />
+  }
+
+  if (listings.length === 0) {
+    return <></>
   }
 
   return listings && (
