@@ -10,6 +10,7 @@ import ListingItem from '../components/ListingItem';
 function Category() {
   const [listings, setListings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastFetchedListing, setLastFetchedListing] = useState(null);
 
   const params = useParams();
 
@@ -19,6 +20,8 @@ function Category() {
         const listingsRef = collection(db, 'listings');
         const q = query(listingsRef, where('type', '==', params.categoryName), orderBy('timestamp', 'desc'), limit(10));
         const querySnap = await getDocs(q);
+        const lastVisibile = querySnap.docs[querySnap.docs.length - 1];
+        setLastFetchedListing(lastVisibile);
         let listings = [];
         querySnap.forEach(doc => {
           listings.push({
@@ -34,6 +37,28 @@ function Category() {
     }
     fetchListings();
   }, [params.categoryName])
+
+  const fetchMoreListings = async () => {
+    try {
+      const listingsRef = collection(db, 'listings');
+      const q = query(listingsRef, where('type', '==', params.categoryName), orderBy('timestamp', 'desc'), startAfter(lastFetchedListing),limit(10));
+      const querySnap = await getDocs(q);
+      const lastVisibile = querySnap.docs[querySnap.docs.length - 1];
+      setLastFetchedListing(lastVisibile);
+      let listings = [];
+      querySnap.forEach(doc => {
+        listings.push({
+          id: doc.id,
+          data : doc.data()
+        });
+      })
+      setListings((prevState) => [...prevState, ...listings]);
+      setLoading(false);
+    } catch (error) {
+      toast.error('Error fetching listings');
+    }
+  }
+  
   return (
     <div className='category'>
       <header>
@@ -50,6 +75,11 @@ function Category() {
           ))}
         </ul>
       </main>
+      <br />
+      <br />
+      {lastFetchedListing && (
+        <p className="loadMore" onClick={fetchMoreListings}>Next</p>
+      )}
       </>)
       : (<p>No properties for {params.categoryName} found</p>)}
     </div>
